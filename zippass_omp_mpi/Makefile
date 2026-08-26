@@ -1,4 +1,4 @@
-include ../../common/Makefile
+include ../Makefile
 FLAGS=-fopenmp
 LIBS=-lzip -lm
 
