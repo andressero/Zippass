@@ -1,0 +1,9 @@
+.vscode
+bin/
+build/
+doc/
+html/
+latex/
+temp/
+callgrind*
+
