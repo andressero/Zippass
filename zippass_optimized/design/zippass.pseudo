@@ -1,0 +1,71 @@
+// Let zippass know the thread count
+// [x] Create a new private_data struct to send all data to threads
+// Maybe let zippass_t be shared_data
+
+declare thread_data_t as a record of
+    thread_number as integer
+    start as integer
+    finish as integer
+end record
+
+procedure brute_force(zippass, zip_path, thread_count) do
+
+    // Create thread_count copies
+    create_dir("temp")
+    declare zip_copies := create_copies(zip_path, thread_count)
+    // [ ] Create a function called create_password_files
+    // [ ] Create another function called remove_files()
+    // Usage of create_files and remove_files to create password buffers.
+    declare passwords := create_files(thread_count)
+    shared thread_count := thread_count
+
+    declare thread_data as an array of thread_data_t
+    declare threads as an array of thread_count threads
+
+    // Start consumers
+    for index := 0 to thread_count do
+        threads[index] := create_thread(thread_brute_force, zip_copies[index])
+    end for
+
+    // Join consumers
+    for index := 0 to thread_count do
+        join_thread(threads[index])
+    end for
+
+    remove_dir("temp")
+    
+end procedure
+
+procedure create_copies(zip_path, thread_count) do
+    declare copies as an array of strings of size thread_count
+
+    for i := 0 to thread_count do
+        declare new_zip_path := "temp/" + i + filename(zip_path)
+        create_temporal_file(zip_path, new_path)
+        copies[i] := new_zip_path
+    end for
+    return copies
+end procedure
+
+procedure delete_copies() do
+    for i := 0 to thread_count do
+        declare new_zip_path := "temp/" + i + filename(zip_path)
+        remove_temporal_file(zip_path, new_path)
+    end for
+end procedure
+
+procedure get_password(index, length, alphabet) do
+    declare base := length(alphabet)
+    declare password := ""
+    declare alphabet_index := 0
+
+    for i := 0 to length do
+        alphabet_index := index mod base
+        password[i] := alphabet[alphabet_index]
+        index := index / base
+    end
+
+    return password
+end procedure
+
+

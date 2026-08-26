@@ -1,0 +1,42 @@
+procedure brute_force(zippass, zip_path) do
+    declare zip as zip_t
+    zip := zip_open(zip_path)
+
+    declare password as string
+    password := ""
+    for(i := 0 to zippass.passwords_max_length) do
+        declare array as array of integers
+        declare count as integer
+
+        count := power(length(zippass.alphabet), i)
+
+        for(j:= 0 to count) do
+            password := get_password(array, alphabet)
+            if(zip_fopen(password) == OPEN) do
+                return password
+            end
+            
+            next_password(array, max)
+        end
+    end
+    return password
+end
+
+procedure get_password(array, alphabet)do
+    declare password as string
+    for(i := 0 to array's size) do
+        password[i] := alphabet[array[i]]
+    end
+    return password
+end
+
+procedure next_password(array, max) do
+    for(i := array's size to 0) do
+        if(array[i] == max) do
+            array[i] := 0
+            break
+        end else do
+            array[i] = array[i] + 1
+        end
+    end
+end

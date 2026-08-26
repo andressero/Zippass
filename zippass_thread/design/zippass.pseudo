@@ -1,0 +1,75 @@
+// Let zippass know the thread count
+// [x] Create a new private_data struct to send all data to threads
+// Maybe let zippass_t be shared_data
+procedure brute_force(zippass, zip_path, thread_count) do
+
+    // Create thread_count copies
+    create_dir("temp")
+    declare zip_copies := create_copies(zip_path, thread_count)
+
+    shared queue := create_strings_queue();
+    shared can_consume := create_semaphore(0)
+    shared can_produce := create_semaphore(1.000.000)
+    
+
+    // Declare thread_count consumer and one producer
+    declare consumers as an array of thread_count threads
+
+    // Start producer
+    declare producer := create_thread(generate_passwords, alphabet, passwords_max_length)
+
+    // Start consumers
+    for index := 0 to thread_count do
+        consumers[index] := create_thread(thread_brute_force, zip_copies[index])
+    end for
+
+    // Join producer
+    join_thread(producer)
+
+    // Break consumer's while
+    for index := 0 to thread_count do
+        signal(can_consume)
+    end for
+
+    // Join consumers
+    for index := 0 to thread_count do
+        join_thread(consumers[index])
+    end for
+
+    remove_dir("temp")
+    
+end procedure
+
+procedure create_copies(zip_path, thread_count) do
+    declare copies as an array of strings of size thread_count
+
+    for i := 0 to thread_count do
+        declare new_zip_path := "temp/" + i + filename(zip_path)
+        create_temporal_file(zip_path, new_path)
+        copies[i] := new_zip_path
+    end for
+    return copies
+end procedure
+
+procedure delete_copies() do
+    for i := 0 to thread_count do
+        declare new_zip_path := "temp/" + i + filename(zip_path)
+        remove_temporal_file(zip_path, new_path)
+    end for
+end procedure
+
+procedure get_password(index, length, alphabet) do
+    declare base := length(alphabet)
+    declare password := ""
+    declare alphabet_index := 0
+
+    for i := 0 to length do
+        alphabet_index := index mod base
+        password[i] := alphabet[alphabet_index]
+        index := index / base
+    end
+
+    return password
+end procedure
+
+

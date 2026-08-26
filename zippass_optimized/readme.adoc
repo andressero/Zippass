@@ -1,0 +1,118 @@
+= Zippass Optimized
+:experimental:
+:nofooter:
+:source-highlighter: pygments
+:stem:
+:toc:
+:xrefstyle: short
+
+[[problem_statement]]
+== Problem statement
+
+This project addresses the problem of forgotten passwords, specifically for encrypted zip files. Zippass thread will try to recover your password using brute force attacks on encrypted files inside a zip archive using a given alphabet and a maximum length.
+
+Generating passwords and brute forcing zip files is a lengthy process. To accelerate the execution, zippass thread creates a team of threads. The main thread will generate passwords and enqueue them in a shared queue while the team dequeues them and brute force copies of the zip file.
+
+Input example:
+
+[source]
+====
+abcdefghijklmnopqrstuvwxyz +
+5
+
+Documents/zips/important_data.zip +
+Documents/zips/Classified.zip +
+Documents/zips/Critical_Backups.zip
+
+====
+
+Output example:
+
+[source]
+====
+Documents/zips/important_data.zip abcde +
+Documents/zips/Classified.zip batzs +
+Documents/zips/Critical_Backups.zip xulrb 
+====
+
+== Report
+[[Report]]
+
+A report related to speedup and efficiency between this project and zippass_thread has been created. Check it out link:report/readme.adoc[here].
+
+[[design]]
+== Design of solution
+
+See the link:design/readme.adoc[design/] folder for an overall design of the solution.
+
+[[user_manual]]
+== User manual
+
+[[build]]
+=== Build
+
+Make sure you have the necessary dependencies: 
+git make gcc build-essential libzip-dev
+
+On Debian you can install them using apt
+
+[source]
+====
+# apt install git make gcc build-essential libzip-dev
+====
+
+To build from source, first clone and access the repository
+
+[source]
+====
+$ git clone https://git.ucr.ac.cr/ANDRES.SERRANOROBLES/paralela23b-andres_serrano.git
+
+$ cd paralela23b-andres_serrano/tareas/zippass_thread
+====
+
+Then run the makefile like this
+
+[source]
+====
+$ make release
+====
+
+[[usage]]
+=== Usage
+
+After compilation, the executable will be in the directory bin/. This program can be executed from the terminal.
+
+[source]
+====
+$ bin/zippass_thread < path/to/textfile.txt
+====
+
+or
+
+[source]
+====
+$ bin/zippass_thread 16 < path/to/textfile.txt 
+====
+
+It doesn't need any arguments, however, you can specify how many threads you want to use to speed the process. It only reads from standard input (stdin). It is recommented you redirect stdin from your keyboard to a [.underline]#text file# (using the '<' character, like it's shown above), since this is the type of file the program expects to read from.
+
+
+After running the command, it will begin execution.
+
+The program reads simple text files that follow this format:
+
+* First line: The alphabet.
+* Second line: The maximum length of the password.
+* Third line: Blank
+* Fourth and the rest: Path to zip files (one on each line).
+
+
+After finishing execution, this program will print to standard output all the zip files and the password next to them, or just the zip file if the password couldn't be found.
+
+
+[[credits]]
+== Credits
+
+andres.serranorobles@ucr.ac.cr
+
+Credits to Kernighan y Ritchie, the authors of the famous book "The C Programming Language". 

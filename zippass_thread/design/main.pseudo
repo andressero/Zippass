@@ -1,0 +1,33 @@
+// [ ] Change pseudocode so it follows the course guidelines
+procedure main() do  
+
+    declare zippass as zippass_t
+    declare line as string
+    
+    line := read_line()  // First line is the alphabet
+    zippass.alphabet := line
+    line := integer(read_line())  // Second line is the maximum length of the passwords
+    zippass.max_length := line
+    line := read_line()  // Third line is blank
+    
+    // The rest of lines are zip archives
+    declare array_zips as array of strings
+
+    while((line := read_line()) != EOF) do
+        append line to array_zips
+    end
+    
+
+    declare array_passwords as array of strings
+    declare password as string
+    for (i := 0 to zip_count) do
+        password := ""
+        password := brute_force(array_zips[i])
+        append password to array_passwords
+    end
+
+    for(i := 0 to zip_count) do
+        print(array_zips[i] + array_passwords[i])
+    end
+
+end

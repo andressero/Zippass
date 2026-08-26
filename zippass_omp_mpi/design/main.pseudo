@@ -1,0 +1,91 @@
+procedure main(argc, argv) do  
+
+    declare zippass as zippass_t
+    declare zips as an array of strings
+    declare line as string
+    
+    mpi_init()
+    
+    declare my_process_number := mpi_get_process_number()
+
+    if my_process_number == 0 do
+        read_data(zippass, zips)
+    end
+    
+    mpi_broadcast(zippass.alphabet, /*root*/0)
+    mpi_broadcast(zippass.passwords_max_length, 0)
+    mpi_broadcast(zippass.thread_count, 0)
+
+    brute_force(zippass)
+
+    print_data(zippass)
+    
+end
+
+procedure brute_force(zippass, zips) do
+    declare process_count := mpi_get_process_count()
+    declare my_process_number := mpi_get_process_number()
+    
+    // process 0 sends zips to other processes and receives the passwords
+    if my_process_number == 0 do
+        // array of passwords
+        declare passwords as an array of strings
+
+        // send zip path to other processes (dynamically)
+        for index := 0 to size(zips) do
+            declare process := -1
+            mpi_receive(process, any_process)
+            mpi_send(zips[index], process)
+            mpi_send(index, process)
+        end
+
+        // send stop condition to all processes
+        for index := 0 to process_count do
+            mpi_send(index, "")
+        end
+
+        // receive passwords from other processes (dinamically)
+        for index := 0 to size(zips) do
+            declare process := -1
+            declare password := ""
+            declare received_index := -1
+
+            mpi_receive(process, any_process)
+            mpi_receive(password, process)
+            mpi_receive(received_index, process)
+            passwords[received_index] := password
+
+        end
+    else
+
+        declare my_passwords as an array of strings
+        declare my_indexes as an array of integers
+        // Eternally receive a zip path from process 0 and append it in a local array
+        while true do
+            declare my_zip := ""
+            declare password := ""
+            declare index := -1
+
+            mpi_send(my_process_number, 0)
+            mpi_receive(my_zip, 0)
+            mpi_receive(index, 0)
+            
+            // Stop condition
+            if my_zip == "" do
+                break
+            end
+
+            password := zippass_brute_force(my_zip)
+            append(password, my_passwords)
+            append(index, my_indexes)
+        end
+
+        // Send all my brute forced passwords to process 0
+        for index := 0 to size(my_passwords) do
+            mpi_send(my_passwords[index], 0)
+            mpi_send(my_indexes[index], 0)
+        end
+    end
+
+    
+end
